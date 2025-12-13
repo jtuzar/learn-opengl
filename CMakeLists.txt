@@ -15,10 +15,15 @@ target_link_libraries(LearnOpenGL glfw)
 target_include_directories(LearnOpenGL PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 # Copy shaders to build directory whenever they change
-add_custom_target(copy_shaders ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/shaders
-        ${CMAKE_BINARY_DIR}/shaders
-    COMMENT "Copying shaders to build directory"
+add_custom_target(copy_assets ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_directory
+								${CMAKE_SOURCE_DIR}/shaders
+								${CMAKE_BINARY_DIR}/shaders
+
+				COMMAND ${CMAKE_COMMAND} -E copy_directory
+								${CMAKE_SOURCE_DIR}/textures
+								${CMAKE_BINARY_DIR}/textures
+				COMMENT "Copying assets to build directory"
 )
-add_dependencies(LearnOpenGL copy_shaders)
+
+add_dependencies(LearnOpenGL copy_assets)
