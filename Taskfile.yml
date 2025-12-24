@@ -3,6 +3,10 @@
 version: "3"
 
 tasks:
+  default:
+    cmds:
+      - task: build
+      - task: run
   build:
     cmds:
       - cmake --build build
