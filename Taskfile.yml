@@ -1,0 +1,11 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  build:
+    cmds:
+      - cmake --build build
+  run:
+    cmds:
+      - ./build/LearnOpenGL
