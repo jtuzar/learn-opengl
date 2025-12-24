@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -6,10 +7,13 @@
 #include <stb_image/stb_image.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow *window, float *weight);
 
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
+const float WEIGHT_MAX = 1.0f;
+const float WEIGHT_MIN = 0.0f;
+const float WEIGHT_STEP = 0.05f;
 
 int main() {
     // glfw initialization
@@ -132,12 +136,16 @@ int main() {
     shader.setInt("texture1", 0);
     shader.setInt("texture2", 1);
 
+    float weight = 0.5f;
+
     while (!glfwWindowShouldClose(window)) {
         // input
-        processInput(window);
+        processInput(window, &weight);
         // rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        shader.setFloat("weight", weight);
 
         glBindVertexArray(VAO);
         glActiveTexture(GL_TEXTURE0);
@@ -164,8 +172,23 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow *window, float *weight) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        std::cout << "Registered escape key press, closing the program"
+                  << std::endl;
         glfwSetWindowShouldClose(window, true);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+        std::cout << "Registered up arrow key press, increasing texture weight"
+                  << std::endl;
+        *weight = std::min(*weight + WEIGHT_STEP, WEIGHT_MAX);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+        std::cout
+            << "Registered down arrow key press, increasing texture weight"
+            << std::endl;
+        *weight = std::max(*weight - WEIGHT_STEP, WEIGHT_MIN);
     }
 }
