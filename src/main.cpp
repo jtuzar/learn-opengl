@@ -1,3 +1,4 @@
+#include "glm/ext/matrix_transform.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -5,6 +6,8 @@
 #include <Shader.hpp>
 #include <stb_image/stb_image.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -129,6 +132,8 @@ int main() {
                           (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    // glm rotation and translation of the container
+
     shader.use();
     shader.setInt("texture1", 0);
     shader.setInt("texture2", 1);
@@ -139,6 +144,13 @@ int main() {
         // rendering
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(),
+                            glm::vec3(0.0f, 0.0f, 1.0f));
+
+        shader.setMat4("transform", trans);
 
         glBindVertexArray(VAO);
         glActiveTexture(GL_TEXTURE0);
