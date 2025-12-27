@@ -4,6 +4,7 @@
 #include <ostream>
 #include <Shader.hpp>
 #include <stb_image/stb_image.h>
+#include <glm/glm.hpp>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
