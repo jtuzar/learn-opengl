@@ -5,11 +5,38 @@ version: "3"
 tasks:
   default:
     cmds:
-      - task: build
-      - task: run
-  build:
+      - task: debug
+
+  debug:
+    desc: Build and run debug build
     cmds:
-      - cmake --build build
-  run:
+      - task: debug-build
+      - task: debug-run
+
+  debug-build:
+    desc: Configure and build debug version
+    cmds:
+      - cmake --preset debug
+      - cmake --build --preset debug
+
+  debug-run:
+    desc: Run debug build
+    cmds:
+      - ./debug/LearnOpenGL
+
+  release:
+    desc: Build and run release build
+    cmds:
+      - task: release-build
+      - task: release-run
+
+  release-build:
+    desc: Configure and build release version
+    cmds:
+      - cmake --preset release
+      - cmake --build --preset release
+
+  release-run:
+    desc: Run release build
     cmds:
       - ./build/LearnOpenGL
