@@ -22,8 +22,8 @@ const unsigned int SCREEN_HEIGHT = 600;
 int main() {
     // glfw initialization
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
@@ -54,18 +54,18 @@ int main() {
 #ifdef DEBUG
     // enable OpenGL debug output (requires OpenGL 4.3+)
 
-        int flags;
-        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-        if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
-            glEnable(GL_DEBUG_OUTPUT);
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-            glDebugMessageCallback(glDebugOutput, nullptr);
-            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
-                                  nullptr, GL_TRUE);
-            std::cout << "OpenGL debug output enabled" << std::endl;
-        } else {
-            std::cout << "Debug context not available" << std::endl;
-        }
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(glDebugOutput, nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0,
+                              nullptr, GL_TRUE);
+        std::cout << "OpenGL debug output enabled" << std::endl;
+    } else {
+        std::cout << "Debug context not available" << std::endl;
+    }
 
 #endif
 
