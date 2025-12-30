@@ -1,7 +1,7 @@
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
-#include "glm/geometric.hpp"
 #include "glm/trigonometric.hpp"
+#include <cmath>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -18,6 +18,8 @@
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xpos, double ypos);
 
 const unsigned int SCREEN_WIDTH = 800;
 const unsigned int SCREEN_HEIGHT = 600;
@@ -25,6 +27,18 @@ const unsigned int SCREEN_HEIGHT = 600;
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float deltaTime = 0.0f;
+float lastFrameTime = 0.0f;
+
+float yawDeg = -90.0f;
+float pitchDeg = 0.0f;
+
+float lastX = 400.0f, lastY = 300.0f;
+
+bool firstMouse = true;
+
+float fov = 45.0f;
 
 int main() {
     // glfw initialization
@@ -51,6 +65,9 @@ int main() {
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -181,6 +198,10 @@ int main() {
     shader.setInt("texture2", 1);
 
     while (!glfwWindowShouldClose(window)) {
+        float currentFrameTime = glfwGetTime();
+        deltaTime = currentFrameTime - lastFrameTime;
+        lastFrameTime = currentFrameTime;
+
         // input
         processInput(window);
         // rendering
@@ -198,8 +219,8 @@ int main() {
 
         glm::mat4 projection;
         projection = glm::perspective(
-            glm::radians(45.0f), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT,
-            0.1f, 100.0f);
+            glm::radians(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f,
+            100.0f);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
 
@@ -238,7 +259,7 @@ void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
-    const float cameraSpeed = 0.05f;
+    const float cameraSpeed = 5.0f * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         cameraPos += cameraSpeed * cameraForward;
     }
@@ -253,4 +274,42 @@ void processInput(GLFWwindow *window) {
         cameraPos +=
             glm::normalize(glm::cross(cameraForward, cameraUp)) * cameraSpeed;
     }
+}
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xOffset = xpos - lastX;
+    float yOffset = ypos - lastY;
+    lastX = xpos;
+    lastY = ypos;
+
+    const float sensitivity = 0.1f;
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
+
+    yawDeg += xOffset;
+    pitchDeg += yOffset;
+
+    if (pitchDeg > 89.0f)
+        pitchDeg = 89.0f;
+    if (pitchDeg < -89.0f)
+        pitchDeg = -89.0f;
+
+    glm::vec3 direction{cos(glm::radians(yawDeg)) * cos(glm::radians(pitchDeg)),
+                        sin(glm::radians(pitchDeg)),
+                        sin(glm::radians(yawDeg)) *
+                            cos(glm::radians(pitchDeg))};
+    cameraForward = glm::normalize(direction);
+}
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+    fov -= (float)yoffset;
+    if (fov < 1.0f)
+        fov = 1.0f;
+    if (fov > 45.0f)
+        fov = 45.0f;
 }
