@@ -7,7 +7,7 @@
 
 // Defines several possible options for camera movement. Used as abstraction to
 // stay away from window-system specific input methods
-enum Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT };
+enum Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN };
 
 // Default camera values
 const float YAW = -90.0f;
@@ -77,6 +77,10 @@ class Camera {
             Position -= Right * velocity;
         if (direction == RIGHT)
             Position += Right * velocity;
+        if (direction == UP)
+            Position += Up * velocity;
+        if (direction == DOWN)
+            Position -= Up * velocity;
     }
 
     // processes input received from a mouse input system. Expects the offset

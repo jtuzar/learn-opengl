@@ -2,6 +2,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
 #include "glm/matrix.hpp"
+#include "glm/trigonometric.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image/stb_image.h>
@@ -39,6 +40,7 @@ float deltaTime = 0.0f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
 glm::vec3 lightPos{1.2f, 1.0f, 2.0f};
+glm::vec3 lightPosInitial{1.2f, 1.0f, 2.0f};
 
 int main() {
     // glfw: initialize and configure
@@ -188,6 +190,11 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        lightPos = glm::vec3(
+            glm::rotate(glm::mat4(1.0), 50 * glm::radians((float)glfwGetTime()),
+                        glm::vec3(0.0, 1.0, 0.0)) *
+            glm::vec4(lightPosInitial, 1.0));
+
         // activate shader
         lightingShader.use();
         lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
@@ -261,6 +268,10 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        camera.ProcessKeyboard(UP, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        camera.ProcessKeyboard(DOWN, deltaTime);
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
