@@ -223,9 +223,14 @@ int main() {
         // activate shader
         lightingShader.use();
         lightingShader.setFloat("material.shininess", 32.0f);
+        lightingShader.setVec3("cameraPos", camera.Position);
+        lightingShader.setVec3("light.position", lightPos);
         lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.setVec3("light.diffuse", lightDiffuseColor);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("light.constant", 1.0f);
+        lightingShader.setFloat("light.linear", 0.09f);
+        lightingShader.setFloat("light.quadratic", 0.032f);
 
         // pass projection matrix to shader (note that in this case it could
         // change every frame)
@@ -237,8 +242,6 @@ int main() {
         // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
         lightingShader.setMat4("view", view);
-        lightingShader.setVec3("light.positionView",
-                               glm::vec3(view * glm::vec4(lightPos, 1.0f)));
 
         // bind diffuse map
         glActiveTexture(GL_TEXTURE0);
@@ -256,7 +259,7 @@ int main() {
             model = glm::rotate(model, glm::radians(angle),
                                 glm::vec3(1.0f, 0.3f, 0.5f));
             lightingShader.setMat4("model", model);
-            glm::mat3 normalMat = glm::transpose(glm::inverse(view * model));
+            glm::mat3 normalMat = glm::transpose(glm::inverse(model));
             lightingShader.setMat3("normalMat", normalMat);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
