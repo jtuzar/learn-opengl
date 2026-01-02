@@ -104,7 +104,6 @@ int main() {
     // build and compile our shader zprogram
     // ------------------------------------
     Shader lightingShader("shaders/object.vert", "shaders/object.frag");
-    Shader lightSourceShader("shaders/object.vert", "shaders/light.frag");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -146,6 +145,13 @@ int main() {
         1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
         -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
 
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
+        glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
+
     unsigned int cubeVBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
@@ -169,17 +175,6 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                           (void *)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
-
-    // light source cube VAO
-    unsigned int lightVAO;
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                          (void *)0);
-    glEnableVertexAttribArray(0);
 
     unsigned int diffuseMap = loadTexture("textures/container2.png");
     unsigned int specularMap = loadTexture("textures/container2_specular.png");
@@ -217,6 +212,7 @@ int main() {
         lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.setVec3("light.diffuse", lightDiffuseColor);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
 
         // pass projection matrix to shader (note that in this case it could
         // change every frame)
@@ -225,12 +221,6 @@ int main() {
             0.1f, 100.0f);
         lightingShader.setMat4("projection", projection);
 
-        // camera/view transformation
-        glm::mat4 view = camera.GetViewMatrix();
-        lightingShader.setMat4("view", view);
-        lightingShader.setVec3("light.positionView",
-                               glm::vec3(view * glm::vec4(lightPos, 1.0f)));
-
         // bind diffuse map
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffuseMap);
@@ -238,28 +228,21 @@ int main() {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, specularMap);
 
-        // render box
-        glBindVertexArray(cubeVAO);
-        glm::mat4 model = glm::mat4(1.0f);
-        lightingShader.setMat4("model", model);
+        // camera/view transformation
+        glm::mat4 view = camera.GetViewMatrix();
+        lightingShader.setMat4("view", view);
+        for (unsigned int i = 0; i < 10; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle),
+                                glm::vec3(1.0f, 0.3f, 0.5f));
+            lightingShader.setMat4("model", model);
+            glm::mat3 normalMat = glm::transpose(glm::inverse(view * model));
+            lightingShader.setMat3("normalMat", normalMat);
 
-        glm::mat3 normalMat = glm::transpose(glm::inverse(view * model));
-        lightingShader.setMat3("normalMat", normalMat);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        // also draw the lamp object
-        lightSourceShader.use();
-        lightSourceShader.setMat4("projection", projection);
-        lightSourceShader.setMat4("view", view);
-        lightSourceShader.setVec3("lightColor", lightDiffuseColor);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-        lightSourceShader.setMat4("model", model);
-
-        glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse
         // moved etc.)
