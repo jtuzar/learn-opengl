@@ -1,3 +1,4 @@
+#include "glm/trigonometric.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image/stb_image.h>
@@ -224,13 +225,14 @@ int main() {
         lightingShader.use();
         lightingShader.setFloat("material.shininess", 32.0f);
         lightingShader.setVec3("cameraPos", camera.Position);
-        lightingShader.setVec3("light.position", lightPos);
+        lightingShader.setVec3("light.position", camera.Position);
+        lightingShader.setVec3("light.direction", camera.Front);
+        lightingShader.setFloat("light.cutoff", glm::cos(glm::radians(12.5f)));
+        lightingShader.setFloat("light.outerCutOff",
+                                glm::cos(glm::radians(17.5f)));
         lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.setVec3("light.diffuse", lightDiffuseColor);
         lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        lightingShader.setFloat("light.constant", 1.0f);
-        lightingShader.setFloat("light.linear", 0.09f);
-        lightingShader.setFloat("light.quadratic", 0.032f);
 
         // pass projection matrix to shader (note that in this case it could
         // change every frame)
