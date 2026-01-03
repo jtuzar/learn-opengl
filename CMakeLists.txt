@@ -8,7 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(glfw3 REQUIRED)
+include(FetchContent)
+FetchContent_Declare(glfw GIT_REPOSITORY https://github.com/glfw/glfw.git GIT_TAG master)
+set(GLFW_BUILD_X11 ON)
+set(GLFW_BUILD_WAYLAND ON)
+FetchContent_MakeAvailable(glfw)
 
 add_executable(LearnOpenGL src/main.cpp src/glad.c src/stb_image.cpp)
 target_link_libraries(LearnOpenGL glfw)

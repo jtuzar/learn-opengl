@@ -18,6 +18,7 @@
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+void error_callback(int error, const char *description);
 void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
 
@@ -43,7 +44,13 @@ glm::vec3 lightDiffuseColor{1.0f, 1.0f, 1.0f};
 int main() {
     // glfw: initialize and configure
     // ------------------------------
+    glfwSetErrorCallback(error_callback);
+    const char *platform = getenv("FORCE_X11");
+    if (platform && platform[0] == '1') {
+        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+    }
     glfwInit();
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -54,6 +61,9 @@ int main() {
 
 #ifdef DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+    printf("X11 supported: %d\n", glfwPlatformSupported(GLFW_PLATFORM_X11));
+    printf("Wayland supported: %d\n",
+           glfwPlatformSupported(GLFW_PLATFORM_WAYLAND));
 #endif
 
     // glfw window creation
@@ -223,9 +233,11 @@ int main() {
         // activate shader
         lightingShader.use();
         lightingShader.setFloat("material.shininess", 32.0f);
-        lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-        lightingShader.setVec3("light.diffuse", lightDiffuseColor);
-        lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("dirLight.direction", -1.0f, -0.7f, 0.3f);
+        lightingShader.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+        lightingShader.setVec3("dirLight.diffuse", lightDiffuseColor);
+        lightingShader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("viewPos", camera.Position);
 
         // pass projection matrix to shader (note that in this case it could
         // change every frame)
@@ -389,4 +401,8 @@ unsigned int loadTexture(char const *path) {
     }
 
     return textureID;
+}
+
+void error_callback(int error, const char *description) {
+    fprintf(stderr, "GLFW error %d: %s\n", error, description);
 }
