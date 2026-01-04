@@ -163,6 +163,10 @@ int main() {
         glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
         glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
 
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(0.7f, 0.2f, 2.0f), glm::vec3(2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f, 2.0f, -12.0f), glm::vec3(0.0f, 0.0f, -3.0f)};
+
     unsigned int cubeVBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
@@ -223,13 +227,6 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        /* // rotate the light
-        lightPos = glm::vec3(
-            glm::rotate(glm::mat4(1.0), 50 * glm::radians((float)glfwGetTime()),
-                        glm::vec3(0.0, 1.0, 0.0)) *
-            glm::vec4(lightPosInitial, 1.0));
-        */
-
         // activate shader
         lightingShader.use();
         lightingShader.setFloat("material.shininess", 32.0f);
@@ -238,6 +235,42 @@ int main() {
         lightingShader.setVec3("dirLight.diffuse", lightDiffuseColor);
         lightingShader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
         lightingShader.setVec3("viewPos", camera.Position);
+
+        lightingShader.setVec3("pointLights[0].position",
+                               pointLightPositions[0]);
+        lightingShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[0].constant", 1.0f);
+        lightingShader.setFloat("pointLights[0].linear", 0.09f);
+        lightingShader.setFloat("pointLights[0].quadratic", 0.032f);
+
+        lightingShader.setVec3("pointLights[1].position",
+                               pointLightPositions[1]);
+        lightingShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[1].constant", 1.0f);
+        lightingShader.setFloat("pointLights[1].linear", 0.09f);
+        lightingShader.setFloat("pointLights[1].quadratic", 0.032f);
+
+        lightingShader.setVec3("pointLights[2].position",
+                               pointLightPositions[2]);
+        lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[2].constant", 1.0f);
+        lightingShader.setFloat("pointLights[2].linear", 0.09f);
+        lightingShader.setFloat("pointLights[2].quadratic", 0.032f);
+
+        lightingShader.setVec3("pointLights[3].position",
+                               pointLightPositions[3]);
+        lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+        lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+        lightingShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("pointLights[3].constant", 1.0f);
+        lightingShader.setFloat("pointLights[3].linear", 0.09f);
+        lightingShader.setFloat("pointLights[3].quadratic", 0.032f);
 
         // pass projection matrix to shader (note that in this case it could
         // change every frame)
@@ -249,8 +282,6 @@ int main() {
         // camera/view transformation
         glm::mat4 view = camera.GetViewMatrix();
         lightingShader.setMat4("view", view);
-        lightingShader.setVec3("light.positionView",
-                               glm::vec3(view * glm::vec4(lightPos, 1.0f)));
 
         // bind diffuse map
         glActiveTexture(GL_TEXTURE0);
@@ -261,33 +292,42 @@ int main() {
 
         glBindVertexArray(cubeVAO);
 
+        glm::mat4 model = glm::mat4(1.0f);
+
         for (unsigned int i = 0; i < 10; i++) {
-            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
             model = glm::rotate(model, glm::radians(angle),
                                 glm::vec3(1.0f, 0.3f, 0.5f));
             lightingShader.setMat4("model", model);
-            glm::mat3 normalMat = glm::transpose(glm::inverse(view * model));
+            glm::mat3 normalMat = glm::transpose(glm::inverse(model));
             lightingShader.setMat3("normalMat", normalMat);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
         // also draw the lamp object
-        glm::mat4 model = glm::mat4(1.0f);
-        lightingShader.setMat4("model", model);
-        lightSourceShader.use();
-        lightSourceShader.setMat4("projection", projection);
-        lightSourceShader.setMat4("view", view);
-        lightSourceShader.setVec3("lightColor", lightDiffuseColor);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-        lightSourceShader.setMat4("model", model);
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // also draw the lamp object(s)
+        lightSourceShader.use();
+        lightSourceShader.setMat4("projection", projection);
+        lightSourceShader.setMat4("view", view);
+
+        // we now draw as many light bulbs as we have point lights.
+        glBindVertexArray(cubeVAO);
+        for (unsigned int i = 0; i < 4; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model =
+                glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+            lightSourceShader.setMat4("model", model);
+            lightSourceShader.setVec3("lightColor", lightDiffuseColor);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse
         // moved etc.)
