@@ -20,7 +20,10 @@ FetchContent_MakeAvailable(assimp)
 
 add_executable(LearnOpenGL src/main.cpp src/glad.c src/stb_image.cpp)
 target_link_libraries(LearnOpenGL glfw assimp)
-target_include_directories(LearnOpenGL PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(LearnOpenGL
+	PRIVATE ${CMAKE_SOURCE_DIR}/include
+	PRIVATE ${glfw_BINARY_DIR}/include
+	PRIVATE ${assimp_BINARY_DIR}/include)
 
 # Define DEBUG macro for debug builds using generator expression
 target_compile_definitions(LearnOpenGL PRIVATE $<$<CONFIG:Debug>:DEBUG>)
