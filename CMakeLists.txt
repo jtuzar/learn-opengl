@@ -10,8 +10,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
 FetchContent_Declare(glfw GIT_REPOSITORY https://github.com/glfw/glfw.git GIT_TAG master)
-set(GLFW_BUILD_X11 ON)
-set(GLFW_BUILD_WAYLAND ON)
 FetchContent_MakeAvailable(glfw)
 
 

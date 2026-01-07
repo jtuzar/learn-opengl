@@ -1,0 +1,6 @@
+CompileFlags:
+  CompilationDatabase: debug
+
+Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
